@@ -1,18 +1,22 @@
 import React from 'react';
-
+import { Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
+// PAGES
+import Home from './pages/Home/Home';
+import Auth from './pages/Auth/Auth';
+
 import './App.css';
-import Button from './components/Button/Button';
 
 function App() {
    return (
       <div className="App">
-         <Toaster/> 
-         <header className="App-header">
-            <h1> Do-It-Now! </h1>
-            <Button>Add Task</Button>
-         </header>
+         <Toaster />
+         <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Auth/>}/>
+            <Route path="*" element={<h1>404</h1>} />
+         </Routes>
       </div>
    );
 }

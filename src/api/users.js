@@ -2,16 +2,18 @@ import api from './axios';
 
 const url = '/users';
 
-
 // for getting user info
 
 export const apiGetUserInfo = async () => {
    try {
-      const { message, user } = await api.get(`${url}`);
+      let response = await api.get(`${url}`);
+
+      const { message, user } = response.data;
 
       return { result: true, message, user };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+      throw err;
    }
 };
 
@@ -19,11 +21,15 @@ export const apiGetUserInfo = async () => {
 
 export const apiRegisterUser = async (data) => {
    try {
-      const { message, token } = await api.post(`${url}/register`, data);
+      let response = await api.post(`${url}/register`, data);
+
+      const { message, token } = response.data;
 
       return { result: true, message, token };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };
 
@@ -31,11 +37,18 @@ export const apiRegisterUser = async (data) => {
 
 export const apiLoginUser = async (data) => {
    try {
-      const { message, token } = await api.post(`${url}/login`, data);
+      let response = await api.post(`${url}/login`, data);
+
+      const { message, token } = response.data;
 
       return { result: true, message, token };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      
+      console.log(err.response.data.message);
+      
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };
 
@@ -43,10 +56,17 @@ export const apiLoginUser = async (data) => {
 
 export const apiLogoutUser = async () => {
    try {
-      const { message } = await api.post(`${url}/logout`);
+      let response = await api.get(`${url}/logout`);
+
+      const { message } = response.data;
 
       return { result: true, message };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      
+      console.log(err);
+      
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };

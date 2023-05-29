@@ -4,13 +4,18 @@ const url = '/tasks';
 
 // for getting all tasks
 
-export const apiGetAllTasks = async () => {
+export const apiGetAllTasks = async (page, isCompleted) => {
    try {
-      const { message, tasks } = await api.get(`${url}`);
+      let isCompletedQuery = isCompleted == null ? '' : `&isCompleted=${isCompleted ? 1 : 0}`;
 
-      return { result: true, message, tasks };
+      let response = await api.get(`${url}?page=${page}&limit=7${isCompletedQuery}`);
+
+      const { message, tasks } = response.data;
+
+      return { message, tasks, result: true };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+      throw err;
    }
 };
 
@@ -18,11 +23,14 @@ export const apiGetAllTasks = async () => {
 
 export const apiGetTaskById = async (id) => {
    try {
-      const { message, task } = await api.get(`${url}/${id}`);
+      let response = await api.get(`${url}/${id}`);
 
-      return { result: true, message, task };
+      const { message, task } = response.data;
+
+      return { message, task, result: true };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+      throw err;
    }
 };
 
@@ -30,11 +38,15 @@ export const apiGetTaskById = async (id) => {
 
 export const apiCreateTask = async (data) => {
    try {
-      const { message, task } = await api.post(`${url}`, data);
+      let response = await api.post(`${url}`, data);
 
-      return { result: true, message, task };
+      const { message, task } = response.data;
+
+      return { message, task };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };
 
@@ -42,11 +54,23 @@ export const apiCreateTask = async (data) => {
 
 export const apiUpdateTask = async (id, data) => {
    try {
-      const { message, task } = await api.put(`${url}/${id}`, data);
+      let requestBody = {
+         title: data.title ? data.title : undefined,
+         description: data.description ? data.description : undefined,
+         deadline: data.deadline ? data.deadline : undefined,
+      };
 
-      return { result: true, message, task };
+      let response = await api.put(`${url}/${id}`, requestBody);
+
+      const { message, task } = response.data;
+
+      return { message, task };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      console.log(err);
+
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };
 
@@ -54,11 +78,15 @@ export const apiUpdateTask = async (id, data) => {
 
 export const apiMarkTask = async (id) => {
    try {
-      const { message, task } = await api.patch(`${url}/${id}/complete`,{});
+      let response = await api.patch(`${url}/${id}/complete`);
 
-      return { result: true, message, task };
+      const { message, task } = response.data;
+
+      return { message, task };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };
 
@@ -66,10 +94,14 @@ export const apiMarkTask = async (id) => {
 
 export const apiDeleteTask = async (id) => {
    try {
-      const { message } = await api.delete(`${url}/${id}`);
+      let response = await api.delete(`${url}/${id}`);
 
-      return { result: true, message };
+      const { message } = response.data;
+
+      return { message };
    } catch (err) {
-      return { result: false, message: err.response.data.message };
+      if (err.response) throw err.response.data.message;
+
+      throw err;
    }
 };

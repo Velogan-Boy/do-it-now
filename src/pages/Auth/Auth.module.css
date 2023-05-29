@@ -1,0 +1,21 @@
+.authContainer {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+   height: 100vh;
+   /* background-color: #f9f9f9; */
+   position: relative;
+}
+
+.authTabs {
+   margin-bottom: 1rem;
+}
+
+.authBox {
+   min-width: 20rem;
+   padding: 2rem;
+   background-color: #ffffff;
+   border: 1px solid #cccccc;
+   border-radius: 5px;
+}

@@ -1,6 +1,9 @@
 :root {
-   --primary-color: #465EFC;
-   --secondary-color: #6C757D;
+   --primary-color: #465efc;
+   --secondary-color: #6c757d;
+   --background-color: #f7f7f7;
+   --background-color-hover: #dadadade;
+   --text-color: #444;
 }
 
 * {
@@ -10,10 +13,42 @@
 }
 
 body {
-   background: linear-gradient(0deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('../public/images/bg.jpg');
+   background: linear-gradient(0deg, #00000066, rgba(0, 0, 0, 0.4)), url('../public/images/bg.jpg');
    background-repeat: no-repeat;
    background-size: cover;
    background-position: center;
    background-attachment: fixed;
    font-family: 'Inter Variable', sans-serif;
+}
+
+a,
+a:visited,
+a:hover,
+a:active,
+a:focus,
+a:link {
+   text-decoration: none;
+   color: inherit;
+}
+
+html::-webkit-scrollbar {
+   width: 7px;
+   height: 7px;
+}
+
+html::-webkit-scrollbar-track {
+   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+   -webkit-border-radius: 10px;
+   border-radius: 10px;
+}
+
+html::-webkit-scrollbar-thumb {
+   -webkit-border-radius: 10px;
+   border-radius: 10px;
+   background: rgba(255, 255, 255, 0.3);
+   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+html::-webkit-scrollbar-thumb:window-inactive {
+   background: rgba(255, 255, 255, 0.3);
 }

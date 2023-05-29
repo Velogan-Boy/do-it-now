@@ -1,32 +1,36 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { ConfigProvider } from 'antd';
 import reportWebVitals from './reportWebVitals';
-import { ThemeProvider } from '@mui/material/styles';
 
 import App from './App';
-import theme from './theme';
 
 import UserContextProvider from './context/UserContext';
 import AppContextProvider from './context/AppContext';
-
-import './index.css';
 import TaskContextProvider from './context/TaskContext';
 
+import '@fontsource/poppins/700.css';
+import '@fontsource-variable/inter';
+
+import theme from './theme';
+import './index.css';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
    <React.StrictMode>
+      <ConfigProvider theme={theme}>
       <Router>
          <AppContextProvider>
             <UserContextProvider>
                <TaskContextProvider>
-                  <ThemeProvider theme={theme}>
-                     <App />
-                  </ThemeProvider>
+                  <App />
                </TaskContextProvider>
             </UserContextProvider>
          </AppContextProvider>
       </Router>
+      </ConfigProvider>
    </React.StrictMode>
 );
 

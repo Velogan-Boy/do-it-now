@@ -10,29 +10,76 @@ const { AppContext } = require('./AppContext');
 const TaskContextProvider = (props) => {
    const { loader, setLoader, isLoggedin, setIsLoggedin } = useContext(AppContext);
 
+   const [isCompleted, setIsCompleted] = useState(null);
    const [tasks, setTasks] = useState([]);
+   const [page, setPage] = useState(1);
 
    // Get All Tasks Handler
 
-   const handleGetAllTasks = async () => {
-      setLoader(true);
+   const handleGetAllTasks = async (showToast) => {
+      // Show the toast with message
 
-      const { result, message, tasks } = await apiGetAllTasks();
+      if (showToast) {
+         toast.promise(apiGetAllTasks(page, isCompleted), {
+            loading: 'Loading Tasks...',
+            success: (data) => {
+               let sortedTasks = data.tasks;
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
+               if (isCompleted !== true) {
+                  // sort the data.tasks by task.deadline
+
+                  sortedTasks = data.tasks.sort((a, b) => {
+                     if (a.deadline === null) return 1;
+                     if (b.deadline === null) return -1;
+                     return new Date(a.deadline) - new Date(b.deadline);
+                  });
+               }
+
+               // sort the data.tasks by task.isCompleted
+
+               sortedTasks = sortedTasks.sort((a, b) => {
+                  return a.isCompleted - b.isCompleted;
+               });
+
+               setTasks(sortedTasks);
+               return 'Tasks Loaded Successfully!';
+            },
+            error: (err) => {
+               return err;
+            },
+         });
+
+         // Don't show the toast - Just set the data
+      } else {
+         apiGetAllTasks(page, isCompleted)
+            .then((data) => {
+               // sort the data.tasks by task.deadline
+
+               let sortedTasks = data.tasks.sort((a, b) => {
+                  if (a.deadline === null) return 1;
+                  if (b.deadline === null) return -1;
+
+                  return new Date(a.deadline) - new Date(b.deadline);
+               });
+
+               // sort the data.tasks by task.isCompleted
+
+               sortedTasks = sortedTasks.sort((a, b) => {
+                  return a.isCompleted - b.isCompleted;
+               });
+
+               setTasks(sortedTasks);
+            })
+            .catch((err) => {
+               toast.error(err);
+            });
       }
-
-      setTasks(tasks);
-      setLoader(false);
    };
 
    // Create Task Handler
 
    const handleCreateTask = async ({ title, description, deadline }) => {
-      setLoader(true);
+      // Validations
 
       if (!title) {
          toast.error('Please fill the title');
@@ -40,19 +87,18 @@ const TaskContextProvider = (props) => {
          return;
       }
 
-      const { result, message } = await apiCreateTask({ title, description, deadline });
+      // Show the toast with message
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
-
-      await handleGetAllTasks();
-
-      setLoader(false);
-
-      toast.success(message);
+      toast.promise(apiCreateTask({ title, description, deadline }), {
+         loading: 'Creating Task...',
+         success: (data) => {
+            handleGetAllTasks();
+            return data.message;
+         },
+         error: (err) => {
+            return err;
+         },
+      });
    };
 
    // Update Task Handler
@@ -66,66 +112,57 @@ const TaskContextProvider = (props) => {
          return;
       }
 
-      const { result, message } = await apiUpdateTask(id, { title, description, deadline });
+      toast.promise(apiUpdateTask(id, { title, description, deadline }), {
+         loading: 'Updating Task...',
+         success: (data) => {
+            handleGetAllTasks();
+            return data.message;
+         },
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
-
-      await handleGetAllTasks();
+         error: (err) => {
+            return err;
+         },
+      });
 
       setLoader(false);
-
-      toast.success(message);
    };
 
    // Mark Task Complete/Incomplete Handler
 
-   const handleMarkTask = async ({ id, isCompleted }) => {
-      setLoader(true);
-
-      const { result, message } = await apiMarkTask(id);
-
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
-
-      await handleGetAllTasks();
-
-      setLoader(false);
-
-      toast.success(message);
+   const handleMarkTask = async (id) => {
+      apiMarkTask(id)
+         .then((data) => {
+            handleGetAllTasks();
+         })
+         .catch((err) => {
+            toast.error(err);
+         });
    };
 
    // Delete Task Handler
 
-   const handleDeleteTask = async ({ id }) => {
+   const handleDeleteTask = async (id) => {
       setLoader(true);
 
-      const { result, message } = await apiDeleteTask(id);
+      toast.promise(apiDeleteTask(id), {
+         loading: 'Deleting Task...',
+         success: (data) => {
+            handleGetAllTasks();
+            setLoader(false);
+            return data.message;
+         },
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
-
-      await handleGetAllTasks();
-
-      setLoader(false);
-
-      toast.success(message);
+         error: (err) => {
+            setLoader(false);
+            return err;
+         },
+      });
    };
 
    useEffect(() => {
-      if (isLoggedin) {
-         handleGetAllTasks();
-      }
-   }, [isLoggedin]);
+      if (isLoggedin === false) return;
+      handleGetAllTasks(true);
+   }, [page, isCompleted, isLoggedin]);
 
    return (
       <TaskContext.Provider
@@ -136,6 +173,10 @@ const TaskContextProvider = (props) => {
             handleUpdateTask,
             handleMarkTask,
             handleDeleteTask,
+            isCompleted,
+            setIsCompleted,
+            page,
+            setPage,
          }}
       >
          {props.children}

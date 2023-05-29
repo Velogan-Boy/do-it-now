@@ -1,8 +1,11 @@
+
+
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { apiGetUserInfo, apiRegisterUser, apiLoginUser, apiLogoutUser } from '../api/users';
+import api from '../api/axios';
 
 export const UserContext = createContext();
 
@@ -16,7 +19,7 @@ const UserContextProvider = (props) => {
    const [user, setUser] = useState({});
 
    // Register User Handler
-   
+
    const handleRegister = async ({ name, email, password, confirmPassword }) => {
       setLoader(true);
 
@@ -46,30 +49,35 @@ const UserContextProvider = (props) => {
 
       // Register User
 
-      const { result, message, token } = await apiRegisterUser({ name, email, password });
+      toast.promise(apiRegisterUser({ name, email, password }), {
+         loading: 'Registering User...',
+         success: (data) => {
+            // Set the localstorage with the token
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
+            localStorage.setItem('token', data.token);
 
-      // set the local storage with the token
+            // logging the user in
 
-      localStorage.setItem('token', token);
+            setIsLoggedin(true);
 
-      // loggin the user in
+            // Navigate to home page
 
-      setIsLoggedin(true);
+            navigate('/');
 
-      // Navigate to home page
+            // Loader false
 
-      navigate('/');
+            setLoader(false);
 
-      // Loader false
-      setLoader(false);
+            return data.message;
+         },
+
+         error: (err) => {
+            setLoader(false);
+            return err;
+         },
+      });
    };
-   
+
    // Login User Handler
 
    const handleLogin = async ({ email, password }) => {
@@ -85,31 +93,36 @@ const UserContextProvider = (props) => {
 
       // Login User
 
-      const { result, message, token } = await apiLoginUser({ email, password });
+      toast.promise(apiLoginUser({ email, password }), {
+         loading: 'Logging in...',
+         success: (data) => {
+            // Set the localstorage with the token
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
+            localStorage.setItem('token', data.token);
 
-      // set the local storage with the token
+            // logging the user in
 
-      localStorage.setItem('token', token);
+            setIsLoggedin(true);
 
-      // logging the user in
+            // Navigate to home page
 
-      setIsLoggedin(true);
+            navigate('/');
 
-      // Navigate to home page
+            // Loader false
 
-      navigate('/');
+            setLoader(false);
 
-      // Loader false
+            return data.message;
+         },
 
-      setLoader(false);
+         error: (err) => {
+            setLoader(false);
+
+            return err;
+         },
+      });
    };
-   
+
    // Logout User Handler
 
    const handleLogout = async () => {
@@ -117,42 +130,56 @@ const UserContextProvider = (props) => {
 
       // Logout User
 
-      const { result, message } = await apiLogoutUser();
+      toast.promise(apiLogoutUser(), {
+         loading: 'Logging out...',
+         success: (res) => {
+            // Remove the token from local storage
 
-      if (!result) {
-         toast.error(message);
-         setLoader(false);
-         return;
-      }
+            localStorage.removeItem('token');
 
-      // Remove the token from local storage
+            // logging the user out
 
-      localStorage.removeItem('token');
+            setIsLoggedin(false);
 
-      // logging the user out
+            // Navigate to home page
 
-      setIsLoggedin(false);
+            navigate('/');
 
-      // Navigate to home page
+            // Loader false
 
-      navigate('/');
+            setLoader(false);
+            
+            return res.message;
+         },
+         error: (err) => {
+            setLoader(false);
 
-      // Loader false
-
-      setLoader(false);
+            return err;
+         },
+      });
    };
 
    useEffect(() => {
       // Check if user is logged in ( if there is a token in local storage )
 
-      apiGetUserInfo()
-         .then((res) => {
-            setUser(res.data.user);
-            setIsLoggedin(true);
-         })
-         .catch((err) => {
-            setIsLoggedin(false);
-         });
+      if (localStorage.getItem('token')) {
+         apiGetUserInfo()
+            .then((res) => {
+               if (!res.result) {
+                  setIsLoggedin(false);
+                  return;
+               }
+
+               setUser(res.user);
+               setIsLoggedin(true);
+            })
+            .catch((err) => {
+               console.log(err);
+               setIsLoggedin(false);
+            });
+      } else {
+         setIsLoggedin(false);
+      }
    }, []);
 
    return <UserContext.Provider value={{ user, setUser, handleRegister, handleLogin, handleLogout }}>{props.children}</UserContext.Provider>;

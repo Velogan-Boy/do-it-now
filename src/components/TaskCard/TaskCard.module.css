@@ -1,0 +1,49 @@
+.task {
+   width: 100%;
+   background-color: var(--background-color);
+   border-radius: 5px;
+   height: 3rem;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   padding: 0 1rem;
+}
+
+.task:hover {
+   background-color: var(--background-color-hover);
+}
+
+.task__title {
+   font-size: 1rem;
+   font-weight: 600;
+   color: var(--text-color);
+   margin-left: 1rem;
+   width: 100%;
+   text-decoration: none;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.task__title__completed {
+   text-decoration: line-through;
+   color: var(--secondary-color);
+}
+
+.task__status {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 3.5rem;
+   height: 3.5rem;
+}
+
+.task__deadline {
+   width: 5rem;
+   height: 3.5rem;
+   display: flex;
+   align-items: center;
+   font-weight: 600;
+   color: var(--secondary-color);
+   text-align: center;
+}

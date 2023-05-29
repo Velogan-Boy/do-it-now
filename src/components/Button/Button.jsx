@@ -2,9 +2,10 @@ import React from 'react';
 
 import styles from './Button.module.css';
 
-function Button({ children }) {
+function Button({ children, onClickMethod }) {
+   
    return (
-      <button type="button" className={styles.button}>
+      <button type="button" className={styles.button} onClick={onClickMethod}>
          <span className={styles.button__text}>{children}</span>
          <span className={styles.button__icon}>
             <svg
